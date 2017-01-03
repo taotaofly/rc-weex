@@ -1,0 +1,28 @@
+PODS:
+  - ATSDK-Weex (0.0.1)
+  - SDWebImage (3.7.5):
+    - SDWebImage/Core (= 3.7.5)
+  - SDWebImage/Core (3.7.5)
+  - SocketRocket (0.4.2)
+  - WeexSDK (0.9.4):
+    - SocketRocket
+  - WXDevtool (0.8.2):
+    - WeexSDK
+
+DEPENDENCIES:
+  - ATSDK-Weex (= 0.0.1)
+  - SDWebImage (= 3.7.5)
+  - SocketRocket (= 0.4.2)
+  - WeexSDK
+  - WXDevtool
+
+SPEC CHECKSUMS:
+  ATSDK-Weex: 1b27558f4336d77fb97704d34fc6ad1fd468592c
+  SDWebImage: 69c6303e3348fba97e03f65d65d4fbc26740f461
+  SocketRocket: ffe08119b00ef982f6c37052a4705a057c8494ad
+  WeexSDK: a059e4c0b47566836d72f2d227d94bac0a04c11f
+  WXDevtool: 0a7a1062e0c8ba4e6aa96f910e3a129a0dcdde0c
+
+PODFILE CHECKSUM: 2859f870033325925b8e5f86236bae5f8dc95b9b
+
+COCOAPODS: 1.1.1

@@ -1,0 +1,53 @@
+<template>
+    <list class="list">
+        <cell class="row" repeat="article in articleList">
+            <div class="menu-item">
+                <text class="menu-item-title">{{article.title}}</text>
+            </div>
+        </cell>
+    </list>
+</template>
+<style>
+    .menu-item {
+        justify-content: center;
+        border-bottom-width: 2px;
+        border-bottom-color: #c0c0c0;
+        height: 100px;
+        padding: 20px;
+    }
+</style>
+
+<script>
+    require('weex-components');
+    var stream = require('@weex-module/stream');
+    var apis = require('../common/api');
+    module.exports = {
+        data: {
+            articleList: [],
+            deviceHeight: 1024
+        },
+        created: function () {
+            var self = this;
+
+            this.$getConfig(function (config) {
+                self.deviceHeight = 750 / config.env.deviceWidth * config.env.deviceHeight - 240
+            }.bind(this));
+
+        },
+        ready: function () {
+            this.getHomeData();
+        },
+
+        computed: {},
+        methods: {
+            getHomeData: function () {
+                var self = this;
+                self.showMainSlider=false;
+                self.imageList = [];
+                apis.getHome(function(retdata) {
+                    self.articleList = retdata.data;
+                });
+            }
+        }
+    }
+</script>

@@ -1,0 +1,6 @@
+<template>
+    <div>
+        <web style="width=750; height=400;" src="http://baidu.com">
+        </web>
+    </div>
+</template>
