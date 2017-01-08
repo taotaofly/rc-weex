@@ -1,6 +1,95 @@
 <template>
-    <div>
-        <web style="width=750; height=400;" src="http://baidu.com">
-        </web>
+    <div class="container">
+        <input
+            id="username"
+            type="text"
+            placeholder="用户名/邮件"
+            class="input username"
+            autofocus="true"
+            value=""
+            onInput="getUsername"
+        />
+        <input
+            id="password"
+            type="password"
+            placeholder="密码"
+            class="input password"
+            value=""
+            onInput="getPassword"
+        />
+        <wxc-button
+            type="danger"
+            size="small"
+            value="登 录"
+            onclick="getToken"
+            style="margin-top: 40;width: 500;background-color: #f23d3d;"></wxc-button>
+        <div class="oauthContainer">
+            <text>或从以下方式登录</text>
+            <div class="hr"></div>
+        </div>
     </div>
 </template>
+
+<style>
+.container {
+    width: 750px;
+    align-items: center; 
+    justify-content: center;
+    background-color: #f4f4f4;
+    font-family: sans-serif;
+}
+.input {
+    display: block;
+    width: 500;
+    height: 60;
+    margin-left:10;
+    margin-right: 10;
+    margin-top: 40;
+    font-size: 20;
+    color: #444;
+    background-color: #e1e1e1;
+    padding-top: 6;
+    padding-bottom: 6;
+    padding-left: 20;
+}
+.username {
+    margin-top: 0;
+}
+.oauthContainer {
+    margin-top: 40;
+}
+</style>
+
+<script>
+require('weex-components');
+var stream = require('@weex-module/stream');
+var apis = require('../common/api');
+
+module.exports = {
+    data: {
+      txtUsername: '',
+      txtPassword: ''
+    },
+    methods: {
+        getUsername: function(event){
+            this.txtUsername = event.value;
+        },
+        getPassword: function(event){
+            this.txtPassword = event.value;
+        },
+        getToken: function(){
+            var self = this;
+            var platform = apis.getBaseClientInfo(self.$getConfig().bundleUrl);
+            var formData = {
+                username: self.txtUsername,
+                password: self.txtPassword,
+                clientId: platform
+            }
+            console.log(formData);
+            apis.getToken(formData, function(ret){
+                console.log(ret);
+            });
+        }
+    }
+}
+</script>

@@ -10,16 +10,20 @@ __weex_define__('@weex-temp/api', function (__weex_require__) {
 
 var apiURL = {
     baseurl: 'http://dev.redcouch.cn',
-    homePage: '/article/list?pageIndex=1'
+    homePage: '/article/list?pageIndex=1',
+    loginPage: '/login'
 };
 
 function getData(url, callback) {
-    stream.sendHttp({
+    stream.fetch({
         method: 'GET',
-        url: url
+        url: url,
+        type: 'json'
     }, function (ret) {
-        var retdata = JSON.parse(ret);
-        callback(retdata);
+        // var retdata = JSON.parse(ret);
+        callback(ret.data);
+    }, function(response){
+        console.log('get in progress:'+response.length);
     });
 }
 
@@ -56,3 +60,38 @@ exports.getBaseUrl = function (bundleUrl, isnav) {
 
     return nativeBase;
 };
+
+function postData(body, url, callback){
+    var bodystr = JSON.stringify(body);
+    stream.fetch({
+        method: 'POST',
+        url: url,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        type: 'json',
+        body: bodystr
+    }, function (ret) {
+        callback(ret.data);
+    }, function(response){
+        console.log('get in progress:'+response.length);
+    });
+}
+
+exports.getToken = function (body, callback) {
+    postData(body, apiURL.baseurl + apiURL.loginPage, callback);
+};
+
+exports.getBaseClientInfo = function(bundleUrl){
+    var nativePlatform;
+    var isAndroidAssets = bundleUrl.indexOf('file://assets/') >= 0;
+    var isiOSAssets = bundleUrl.indexOf('file:///') >= 0 && bundleUrl.indexOf('WeexDemo.app') > 0;
+    if (isAndroidAssets) {
+        nativePlatform = 'Android';
+    } else if (isiOSAssets) {
+        nativePlatform = 'iOS';
+    } else {
+        nativePlatform = 'H5';
+    }
+    return nativePlatform;
+}

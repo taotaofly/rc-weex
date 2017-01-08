@@ -30,6 +30,7 @@
             var self = this;
 
             this.$getConfig(function (config) {
+                console.log(config);
                 self.deviceHeight = 750 / config.env.deviceWidth * config.env.deviceHeight - 240
             }.bind(this));
 
