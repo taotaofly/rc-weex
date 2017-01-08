@@ -48,4 +48,6 @@ jspm_packages
 
 # Weex ios generated file
 ios/playground/build
+ios/playground/bundlejs
 ios/playground/Pods
+dist
