@@ -20,6 +20,13 @@
         },
         {
           index: 1,
+          title: 'Favorites',
+          titleColor: '#000000',
+          src: 'modules/favorite.js',
+          visibility: 'hidden',
+        },
+        {
+          index: 2,
           title: 'Setting',
           titleColor: '#000000',
           src: 'modules/setting.js',
