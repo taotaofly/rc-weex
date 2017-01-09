@@ -1,19 +1,74 @@
 <template>
     <list class="list">
         <cell class="row" repeat="article in articleList">
-            <div class="menu-item">
-                <text class="menu-item-title">{{article.title}}</text>
+            <div class="item">
+                <img class="cover" src="http://b.hiphotos.baidu.com/news/crop%3D0%2C1%2C396%2C238%3Bw%3D638/sign=9864067bc05c1038303194828f21bf22/9d82d158ccbf6c81f13e2a89ba3eb13533fa4041.jpg" />
+                <text class="title">{{article.title}}</text>
             </div>
+            <div class="item-action">
+                <text class="date">{{article.date}}</text>
+                <div class="action">
+                    <text class="action-favorite">收藏</text>
+                </div>
+            <div>
         </cell>
     </list>
 </template>
 <style>
-    .menu-item {
-        justify-content: center;
-        border-bottom-width: 2px;
-        border-bottom-color: #c0c0c0;
-        height: 100px;
-        padding: 20px;
+    .list {
+        background-color: #f4f4f4;
+    }
+    .row {
+        margin: 20;
+        margin-bottom: 0;
+        width: 750;
+    }
+    .item {
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 10;
+        padding-top: 20;
+        padding-bottom: 20;
+        width: 710;
+        background-color: #ffffff;
+    }
+    .cover {
+        width:200;
+        height: 120;
+    }
+    .title {
+        width: 460;
+        height: 120;
+        margin-left: 20;
+        font-family: sans-serif;
+        font-size: 22;
+        color: #333;
+    }
+    .item-action {
+        border-top: 0.5px solid #ccc;
+        width: 710;
+        height: 44;
+        padding: 10;
+        background-color: #fff;
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    .date {
+        font-family: sans-serif;
+        font-size: 18;
+        color: #aaa;
+        width: 200;
+    }
+    .action {
+        width: 490;
+        flex-direction: row;
+    }
+    .action-favorite {
+        text-align: right;
+        flex: 1;
+        font-family: sans-serif;
+        font-size: 18;
+        color: #aaa;
     }
 </style>
 
