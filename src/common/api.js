@@ -10,7 +10,7 @@ __weex_define__('@weex-temp/api', function (__weex_require__) {
 
 var apiURL = {
     baseurl: 'http://dev.redcouch.cn',
-    homePage: '/article/list?pageIndex=1',
+    homePage: '/article/list',
     loginPage: '/login'
 };
 
@@ -27,8 +27,9 @@ function getData(url, callback) {
     });
 }
 
-exports.getHome = function (callback) {
-    getData(apiURL.baseurl + apiURL.homePage, callback);
+exports.getHomeUrl = function (callback) {
+    return apiURL.baseurl + apiURL.homePage;
+    // getData(apiURL.baseurl + apiURL.homePage, callback);
 };
 
 exports.getBaseUrl = function (bundleUrl, isnav) {
@@ -44,7 +45,7 @@ exports.getBaseUrl = function (bundleUrl, isnav) {
         nativeBase = bundleUrl.substring(0, bundleUrl.lastIndexOf('/') + 1);
     }
     else {
-        var host = 'localhost:8080';
+        var host = 'http://localhost:8080';
         var matches = /\/\/([^\/]+?)\//.exec(bundleUrl);
         if (matches && matches.length >= 2) {
             host = matches[1];

@@ -100,9 +100,9 @@
                 var self = this;
                 self.showMainSlider=false;
                 self.imageList = [];
-                apis.getHome(function(retdata) {
-                    self.articleList = retdata.data;
-                });
+                // apis.getHome(function(retdata) {
+                //     self.articleList = retdata.data;
+                // });
             },
             doFavorite: function(event){
                 // TODO: favorite/unfavorite article for current user;

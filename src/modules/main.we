@@ -1,27 +1,55 @@
 <template>
-    <list class="list">
-        <cell class="row" repeat="article in articleList">
-            <div class="item">
-                <img class="cover" src="http://b.hiphotos.baidu.com/news/crop%3D0%2C1%2C396%2C238%3Bw%3D638/sign=9864067bc05c1038303194828f21bf22/9d82d158ccbf6c81f13e2a89ba3eb13533fa4041.jpg" />
-                <text class="title">{{article.title}}</text>
-                <text if={{article.desc!='null'}} class="desc">{{article.desc}}</text>
-            </div>
-            <div class="item-action">
-                <div class="action">
-                    <text class="action-favorite">收藏</text>
+    <div class="wrapper">
+        <list class="list">
+            <refresh class="refreshBlock" onrefresh="refreshData" display="{{refreshDisplay}}">
+                <loading-indicator class="indicator"></loading-indicator>
+                <text class="loadingText">刷新列表</text>
+            </refresh>
+            <cell class="row" repeat="article in articleList" id="article-{{$index}}">
+                <div class="item">
+                    <img class="cover" src="http://b.hiphotos.baidu.com/news/crop%3D0%2C1%2C396%2C238%3Bw%3D638/sign=9864067bc05c1038303194828f21bf22/9d82d158ccbf6c81f13e2a89ba3eb13533fa4041.jpg" />
+                    <text class="title">{{article.title}}</text>
+                    <text if={{article.desc!='null'}} class="desc">{{article.desc}}</text>
                 </div>
-                <text class="date">{{article.date}}</text> 
-            <div>
-        </cell>
-    </list>
+                <div class="item-action">
+                    <div class="action">
+                        <text class="action-favorite">收藏</text>
+                    </div>
+                    <text class="date">{{article.date}}</text> 
+                </div>
+            </cell>
+            <loading class="loading" onloading="loadingData" display="{{loadingDisplay}}">
+                <loading-indicator class="indicator"></loading-indicator>
+                <text class="loadingText">{{loadingText}}</text>
+            </loading>
+        </list>
+    </div>
 </template>
 <style>
+    .wrapper {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+    }
     .list {
         background-color: #fff;
+        flex: 1;
+    }
+    .refreshBlock {
+        width: 750;
+        height: 30;
+        background: #fff;
+        color: #555;
+        flex-direction: row;
+        justify-content: center;
+    }
+    .indicator {
+        color: #555;
     }
     .row {
         margin: 30;
-        margin-top: 40;
+        margin-top: 20;
         margin-bottom: 0;
         width: 690;
     }
@@ -60,6 +88,7 @@
         flex-direction: row;
         align-items: flex-start;
         margin-top: 20;
+        margin-bottom: 40;
     }
     .action {
         width: 400;
@@ -77,38 +106,93 @@
         width: 270;
         text-align: right;
     }
+    .loading {
+        width: 750;
+        height: 100;
+        background-color: #fff;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    .loadingText {
+        font-family: sans-serif;
+        font-size: 22;
+        color:#555;
+        margin-left: 40;
+    }
 </style>
 
 <script>
-    require('weex-components');
+    var dom = require('@weex-module/dom');
     var stream = require('@weex-module/stream');
     var apis = require('../common/api');
+
     module.exports = {
         data: {
             articleList: [],
-            deviceHeight: 1024
+            deviceHeight: 1024,
+            isLoaded: true,
+            page: 1,
+            loadingDisplay: 'hide',
+            refreshDisplay: 'hide',
+            loadingText: '加载中...'
         },
         created: function () {
             var self = this;
-
-            this.$getConfig(function (config) {
-                console.log(config);
-                self.deviceHeight = 750 / config.env.deviceWidth * config.env.deviceHeight - 240
-            }.bind(this));
-
+            var url = apis.getHomeUrl() + '?pageIndex=' + this.page;
+            this.renderData(url);
+            this.page++;
         },
         ready: function () {
-            this.getHomeData();
         },
-
         computed: {},
         methods: {
-            getHomeData: function () {
+            renderData: function (url) {
                 var self = this;
-                self.showMainSlider=false;
-                self.imageList = [];
-                apis.getHome(function(retdata) {
-                    self.articleList = retdata.data;
+                stream.fetch({
+                    method: 'GET',
+                    url: url,
+                    type:'json'
+                }, function(res) {
+                    self.refreshDisplay = 'hide';
+                    self.loadingDisplay = 'hide';
+                    try {
+                        var results = res.data.data;
+                        if (Array.isArray(results)) {
+                            for(var i = 0; i < results.length; i++) {
+                                self.articleList.push(results[i]);
+                            }
+                        }
+                    } catch(e) {}
+                },function(res){
+
+                })
+            },
+            loadingData: function (e) {
+                var url = apis.getHomeUrl() + '?pageIndex=' + this.page;
+                var self = this;
+                if (self.isLoaded === false) return;
+                self.loadingDisplay = 'show';
+
+                if (self.page <=3 ) {
+                    self.renderData(url);
+                    self.page++;
+                } else {
+                    self.loadingDisplay = 'hide';
+                    self.loadingText = '没有更多沙发了';
+                }
+            },
+            refreshData: function (e) {
+                var url = apis.getHomeUrl() + '?pageIndex=1';
+                if (this.isLoaded === false) return;
+                this.refreshDisplay = 'show';
+                this.articleList = [];
+                this.page = 1;
+                this.renderData(url);
+            },
+            goToTop: function (e) {
+                dom.scrollToElement(this.$el('article-0'), {
+                    offset: 0
                 });
             },
             doFavorite: function(event){
