@@ -51,3 +51,4 @@ ios/playground/build
 ios/playground/bundlejs
 ios/playground/Pods
 dist
+*.DS_Store
