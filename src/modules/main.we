@@ -126,6 +126,7 @@
     var dom = require('@weex-module/dom');
     var stream = require('@weex-module/stream');
     var apis = require('../common/api');
+    var baseQueryUrl = apis.getHomeUrl();
 
     module.exports = {
         data: {
@@ -133,13 +134,15 @@
             deviceHeight: 1024,
             isLoaded: true,
             page: 1,
+            hasMore: true,
+            orderDirect: 'desc',
             loadingDisplay: 'hide',
             refreshDisplay: 'hide',
             loadingText: '加载中...'
         },
         created: function () {
             var self = this;
-            var url = apis.getHomeUrl() + '?pageIndex=' + this.page;
+            var url = `${baseQueryUrl}?order=${self.orderDirect}&pageIndex=${self.page}`;
             this.renderData(url);
             this.page++;
         },
@@ -159,22 +162,25 @@
                     try {
                         var results = res.data.data;
                         if (Array.isArray(results)) {
+                            if( !results.length ) {
+                                self.hasMore = false;
+                            }
                             for(var i = 0; i < results.length; i++) {
                                 self.articleList.push(results[i]);
                             }
                         }
-                    } catch(e) {}
+                    } catch(e) { self.hasMore = false; }
                 },function(res){
 
                 })
             },
             loadingData: function (e) {
-                var url = apis.getHomeUrl() + '?pageIndex=' + this.page;
                 var self = this;
+                var url = `${baseQueryUrl}?order=${self.orderDirect}&pageIndex=${self.page}`;
                 if (self.isLoaded === false) return;
                 self.loadingDisplay = 'show';
 
-                if (self.page <=3 ) {
+                if (self.hasMore) {
                     self.renderData(url);
                     self.page++;
                 } else {
@@ -183,12 +189,17 @@
                 }
             },
             refreshData: function (e) {
-                var url = apis.getHomeUrl() + '?pageIndex=1';
-                if (this.isLoaded === false) return;
-                this.refreshDisplay = 'show';
-                this.articleList = [];
-                this.page = 1;
-                this.renderData(url);
+                var self = this;
+                var url = `${baseQueryUrl}?order=${self.orderDirect}&pageIndex=1`;
+                if (self.isLoaded === false) return;
+                self.refreshDisplay = 'show';
+                self.hasMore = true;
+                self.articleList = [];
+                self.page = 1;
+                self.renderData(url);
+            },
+            changeOrderDirect: function(e) {
+                // TODO: reverse the order direct and refresh data;
             },
             goToTop: function (e) {
                 dom.scrollToElement(this.$el('article-0'), {
