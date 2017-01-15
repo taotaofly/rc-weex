@@ -15,6 +15,8 @@
           index: 0,
           title: 'Videos',
           titleColor: '#000000',
+          image: 'http://ojtmprfxw.bkt.clouddn.com/list.png',
+          selectedImage: 'http://ojtmprfxw.bkt.clouddn.com/list-selected.png',
           src: 'modules/main.js',
           visibility: 'visible',
         },
@@ -22,6 +24,8 @@
           index: 1,
           title: 'Favorites',
           titleColor: '#000000',
+          image: 'http://ojtmprfxw.bkt.clouddn.com/favorite.png',
+          selectedImage: 'http://ojtmprfxw.bkt.clouddn.com/favorite-selected.png',
           src: 'modules/favorite.js',
           visibility: 'hidden',
         },
@@ -29,20 +33,19 @@
           index: 2,
           title: 'Setting',
           titleColor: '#000000',
+          image: 'http://ojtmprfxw.bkt.clouddn.com/couch.png',
+          selectedImage: 'http://ojtmprfxw.bkt.clouddn.com/couch-selected.png',
           src: 'modules/setting.js',
           visibility: 'hidden',
         }
       ],
     },
     created: function () {
-        console.log('tabbar created');
         var bundleUrl = this.$getConfig().bundleUrl;
         var base = apis.getBaseUrl(bundleUrl);
-        console.log(base);
         for (var i = 0; i < this.tabItems.length; i++) {
             var tabItem = this.tabItems[i];
             tabItem.src = base + tabItem.src;
-            console.log('tabItem.src: ',tabItem.src);
         }
     },
     methods: {

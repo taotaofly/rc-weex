@@ -11,7 +11,9 @@ __weex_define__('@weex-temp/api', function (__weex_require__) {
 var apiURL = {
     baseurl: 'http://dev.redcouch.cn',
     homePage: '/article/list',
-    loginPage: '/login'
+    favoritePage: '/article/favorites',
+    loginPage: '/login',
+    favoriteAction: '/article/favorite'
 };
 
 function getData(url, callback) {
@@ -27,10 +29,13 @@ function getData(url, callback) {
     });
 }
 
-exports.getHomeUrl = function (callback) {
+exports.getHomeUrl = function () {
     return apiURL.baseurl + apiURL.homePage;
-    // getData(apiURL.baseurl + apiURL.homePage, callback);
 };
+
+exports.getFavoriteUrl = function() {
+    return apiURL.baseurl + apiURL.favoritePage;
+}
 
 exports.getBaseUrl = function (bundleUrl, isnav) {
     bundleUrl = new String(bundleUrl);
@@ -82,6 +87,10 @@ function postData(body, url, callback){
 exports.getToken = function (body, callback) {
     postData(body, apiURL.baseurl + apiURL.loginPage, callback);
 };
+
+exports.doFavorite = function(body, callback){
+    postData(body, apiURL.baseurl + apiURL.favoriteAction, callback);
+}
 
 exports.getBaseClientInfo = function(bundleUrl){
     var nativePlatform;

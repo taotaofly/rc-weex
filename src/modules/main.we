@@ -5,15 +5,20 @@
                 <loading-indicator class="indicator"></loading-indicator>
                 <text class="loadingText">刷新列表</text>
             </refresh>
-            <cell class="row" repeat="article in articleList" id="article-{{$index}}">
+            <cell class="row" repeat="(index, article) in articleList" id="article-{{index}}">
                 <div class="item">
-                    <img class="cover" src="http://b.hiphotos.baidu.com/news/crop%3D0%2C1%2C396%2C238%3Bw%3D638/sign=9864067bc05c1038303194828f21bf22/9d82d158ccbf6c81f13e2a89ba3eb13533fa4041.jpg" />
+                    <image class="cover" src="http://b.hiphotos.baidu.com/news/crop%3D0%2C1%2C396%2C238%3Bw%3D638/sign=9864067bc05c1038303194828f21bf22/9d82d158ccbf6c81f13e2a89ba3eb13533fa4041.jpg">
+                    </image>
                     <text class="title">{{article.title}}</text>
                     <text if={{article.desc!='null'}} class="desc">{{article.desc}}</text>
                 </div>
                 <div class="item-action">
-                    <div class="action">
-                        <text class="action-favorite">收藏</text>
+                    <div
+                        class="action {{article.isFavorite}}"
+                        fid="{{article.id}}"
+                        findex="{{index}}"
+                        onclick="doFavorite"
+                    >
                     </div>
                     <text class="date">{{article.date}}</text> 
                 </div>
@@ -93,11 +98,14 @@
     .action {
         width: 400;
         flex-direction: row;
+        padding-left: 30;
+        height: 34;
     }
     .action-favorite {
         font-family: sans-serif;
         font-size: 24;
         color: #aaa;
+
     }
     .date {
         font-family: sans-serif;
@@ -120,6 +128,22 @@
         color:#555;
         margin-left: 40;
     }
+    .favorite {
+        background-image: url('http://ojtmprfxw.bkt.clouddn.com/unfavorite.png');
+        background-size: 26;
+        background-repeat: no-repeat;
+    }
+    .unfavorite {
+        background-image: url('http://ojtmprfxw.bkt.clouddn.com/dofavorite.png');
+        background-size: 26;
+        background-repeat: no-repeat;
+    }
+    .is-favorite {
+        color: #f23d3d;
+    }
+    .is-unfavorite {
+        color: #aaa;
+    }
 </style>
 
 <script>
@@ -131,7 +155,6 @@
     module.exports = {
         data: {
             articleList: [],
-            deviceHeight: 1024,
             isLoaded: true,
             page: 1,
             hasMore: true,
@@ -159,6 +182,7 @@
                 }, function(res) {
                     self.refreshDisplay = 'hide';
                     self.loadingDisplay = 'hide';
+                    self.isLoaded = true;
                     try {
                         var results = res.data.data;
                         if (Array.isArray(results)) {
@@ -166,7 +190,9 @@
                                 self.hasMore = false;
                             }
                             for(var i = 0; i < results.length; i++) {
-                                self.articleList.push(results[i]);
+                                const tempResult = results[i];
+                                tempResult.isFavorite = tempResult.fid ? 'favorite' : 'unfavorite';
+                                self.articleList.push(tempResult);
                             }
                         }
                     } catch(e) { self.hasMore = false; }
@@ -178,6 +204,7 @@
                 var self = this;
                 var url = `${baseQueryUrl}?order=${self.orderDirect}&pageIndex=${self.page}`;
                 if (self.isLoaded === false) return;
+                self.isLoaded = false;
                 self.loadingDisplay = 'show';
 
                 if (self.hasMore) {
@@ -192,11 +219,13 @@
                 var self = this;
                 var url = `${baseQueryUrl}?order=${self.orderDirect}&pageIndex=1`;
                 if (self.isLoaded === false) return;
+                self.isLoaded = false;
                 self.refreshDisplay = 'show';
                 self.hasMore = true;
                 self.articleList = [];
                 self.page = 1;
                 self.renderData(url);
+                self.page++;
             },
             changeOrderDirect: function(e) {
                 // TODO: reverse the order direct and refresh data;
@@ -206,8 +235,21 @@
                     offset: 0
                 });
             },
-            doFavorite: function(event){
+            doFavorite: function(e){
                 // TODO: favorite/unfavorite article for current user;
+                console.log(e.target.attr.fid);
+                var self = this;
+                apis.doFavorite({userId:1, articleId: e.target.attr.fid}, function(res){
+                    console.log(res);
+                    if(res.status=='favorite' || res.status=='unfavorite'){
+                        const tempObj = Object.assign(
+                            {},
+                            self.articleList[Number(e.target.attr.findex)],
+                            {isFavorite: res.status}
+                        );
+                        self.articleList.$set(Number(e.target.attr.findex), tempObj);
+                    }
+                });
             },
             doOrder: function(event){
                 // TODO: order list by id asc/desc
