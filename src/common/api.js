@@ -8,24 +8,31 @@ __weex_define__('@weex-temp/api', function (__weex_require__) {
     stream = __weex_require__('@weex-module/stream')
 });
 
+var storage
+__weex_define__('@weex-temp/api', function (__weex_require__) {
+    storage = __weex_require__('@weex-module/storage')
+});
+
 var apiURL = {
     baseurl: 'http://dev.redcouch.cn',
     homePage: '/article/list',
-    favoritePage: '/article/favorites',
-    loginPage: '/login',
-    favoriteAction: '/article/favorite'
+    favoritePage: '/favorite/list',
+    loginPage: '/auth/login',
+    favoriteAction: '/favorite'
 };
 
-function getData(url, callback) {
+function getData(url, callbackSuccess, callbackFailure) {
     stream.fetch({
         method: 'GET',
         url: url,
         type: 'json'
-    }, function (ret) {
-        // var retdata = JSON.parse(ret);
-        callback(ret.data);
+    }, function (res) {
+        try {
+            callbackSuccess(res.data);
+        } catch (e) {
+            callbackFailure(res);
+        }
     }, function(response){
-        console.log('get in progress:'+response.length);
     });
 }
 
@@ -67,30 +74,50 @@ exports.getBaseUrl = function (bundleUrl, isnav) {
     return nativeBase;
 };
 
-function postData(body, url, callback){
+function postData(body, url, callbackSuccess, callbackFailure, header){
     var bodystr = JSON.stringify(body);
+    console.log('header: ', header, 'body', bodystr);
     stream.fetch({
         method: 'POST',
         url: url,
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: header,
         type: 'json',
         body: bodystr
-    }, function (ret) {
-        callback(ret.data);
+    }, function (res) {
+        try {
+            callbackSuccess(res.data);
+        } catch (e) {
+            callbackFailure(res);
+        }
     }, function(response){
-        console.log('get in progress:'+response.length);
     });
 }
 
-exports.getToken = function (body, callback) {
-    postData(body, apiURL.baseurl + apiURL.loginPage, callback);
+exports.getToken = function (body, callbackSuccess, callbackFailure) {
+    postData(
+        body, 
+        apiURL.baseurl + apiURL.loginPage, 
+        callbackSuccess, 
+        callbackFailure, 
+        { 'Content-Type': 'application/json'}
+    );
 };
 
-exports.doFavorite = function(body, callback){
-    postData(body, apiURL.baseurl + apiURL.favoriteAction, callback);
-}
+exports.doFavorite = function(body, callbackSuccess, callbackFailure){
+    storage.getItem('accessToken', function(e){
+        let header = e.data || '';
+        header = header ? 
+            {
+                'Authorization': 'Bearer ' + header,
+                'Content-Type': 'application/json'
+            } 
+            : 
+            {
+                'Content-Type': 'application/json'
+            };
+        postData(body, apiURL.baseurl + apiURL.favoriteAction, callbackSuccess, callbackFailure, header);
+    });
+};
 
 exports.getBaseClientInfo = function(bundleUrl){
     var nativePlatform;
@@ -104,4 +131,8 @@ exports.getBaseClientInfo = function(bundleUrl){
         nativePlatform = 'H5';
     }
     return nativePlatform;
+}
+
+exports.needLogin = function(res) {
+    return res.status === 401;
 }

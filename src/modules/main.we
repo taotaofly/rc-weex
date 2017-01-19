@@ -148,6 +148,7 @@
 
 <script>
     var dom = require('@weex-module/dom');
+    var storage = require('@weex-module/storage');
     var stream = require('@weex-module/stream');
     var apis = require('../common/api');
     var baseQueryUrl = apis.getHomeUrl();
@@ -175,30 +176,37 @@
         methods: {
             renderData: function (url) {
                 var self = this;
-                stream.fetch({
-                    method: 'GET',
-                    url: url,
-                    type:'json'
-                }, function(res) {
-                    self.refreshDisplay = 'hide';
-                    self.loadingDisplay = 'hide';
-                    self.isLoaded = true;
-                    try {
-                        var results = res.data.data;
-                        if (Array.isArray(results)) {
-                            if( !results.length ) {
-                                self.hasMore = false;
+                storage.getItem('accessToken', function(e) {
+                    let header = e.data || '';
+                    header = header ? {'Authorization': 'Bearer ' + header} : '';
+                    console.log('get item accessToken: ', e);
+                    console.log('get header', header);
+                    stream.fetch({
+                        method: 'GET',
+                        url: url,
+                        type:'json',
+                        headers: header
+                    }, function(res) {
+                        self.refreshDisplay = 'hide';
+                        self.loadingDisplay = 'hide';
+                        self.isLoaded = true;
+                        try {
+                            var results = res.data.data;
+                            if (Array.isArray(results)) {
+                                if( !results.length ) {
+                                    self.hasMore = false;
+                                }
+                                for(var i = 0; i < results.length; i++) {
+                                    const tempResult = results[i];
+                                    tempResult.isFavorite = tempResult.fid ? 'favorite' : 'unfavorite';
+                                    self.articleList.push(tempResult);
+                                }
                             }
-                            for(var i = 0; i < results.length; i++) {
-                                const tempResult = results[i];
-                                tempResult.isFavorite = tempResult.fid ? 'favorite' : 'unfavorite';
-                                self.articleList.push(tempResult);
-                            }
-                        }
-                    } catch(e) { self.hasMore = false; }
-                },function(res){
+                        } catch(e) { self.hasMore = false; }
+                    },function(res){
 
-                })
+                    });
+                });
             },
             loadingData: function (e) {
                 var self = this;
@@ -239,17 +247,24 @@
                 // TODO: favorite/unfavorite article for current user;
                 console.log(e.target.attr.fid);
                 var self = this;
-                apis.doFavorite({userId:1, articleId: e.target.attr.fid}, function(res){
-                    console.log(res);
-                    if(res.status=='favorite' || res.status=='unfavorite'){
-                        const tempObj = Object.assign(
-                            {},
-                            self.articleList[Number(e.target.attr.findex)],
-                            {isFavorite: res.status}
-                        );
-                        self.articleList.$set(Number(e.target.attr.findex), tempObj);
-                    }
-                });
+                apis.doFavorite(
+                    {articleId: e.target.attr.fid}, 
+                    function(res){
+                        if(res.status=='favorite' || res.status=='unfavorite'){
+                            const tempObj = Object.assign(
+                                {},
+                                self.articleList[Number(e.target.attr.findex)],
+                                {isFavorite: res.status}
+                            );
+                            self.articleList.$set(Number(e.target.attr.findex), tempObj);
+                        }
+                    },
+                    function(res){
+                        if(apis.needLogin(res)){
+                            console.log('navigator to login page');
+                        }
+                    },
+                );
             },
             doOrder: function(event){
                 // TODO: order list by id asc/desc

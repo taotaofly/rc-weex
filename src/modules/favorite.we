@@ -117,6 +117,7 @@
 
 <script>
     require('weex-components');
+    var storage = require('@weex-module/storage');
     var stream = require('@weex-module/stream');
     var apis = require('../common/api');
     var baseQueryUrl = apis.getFavoriteUrl();
@@ -145,28 +146,39 @@
         methods: {
             renderData: function (url) {
                 var self = this;
-                stream.fetch({
-                    method: 'GET',
-                    url: url,
-                    type:'json'
-                }, function(res) {
-                    self.refreshDisplay = 'hide';
-                    self.loadingDisplay = 'hide';
-                    try {
-                        var results = res.data.data;
-                        console.log(results);
-                        if (Array.isArray(results)) {
-                            if( !results.length ) {
-                                self.hasMore = false;
+                storage.getItem('accessToken', function(e) {
+                    let header = e.data || '';
+                    header = header ? {'Authorization': 'Bearer ' + header} : '';
+                    console.log('get item accessToken: ', e);
+                    console.log('get header', header);
+                    stream.fetch({
+                        method: 'GET',
+                        url: url,
+                        type:'json',
+                        headers: header
+                    }, function(res) {
+                        self.refreshDisplay = 'hide';
+                        self.loadingDisplay = 'hide';
+                        try {
+                            var results = res.data.data;
+                            if (Array.isArray(results)) {
+                                if( !results.length ) {
+                                    self.hasMore = false;
+                                }
+                                for(var i = 0; i < results.length; i++) {
+                                    self.articleList.push(results[i]);
+                                }
                             }
-                            for(var i = 0; i < results.length; i++) {
-                                self.articleList.push(results[i]);
+                        } catch(e) { 
+                            self.hasMore = false;
+                            if (apis.needLogin(res)){
+                                console.log('favorite need navigator to login in catch');
                             }
                         }
-                    } catch(e) { self.hasMore = false; }
-                },function(res){
+                    },function(res){
 
-                })
+                    })
+                });
             },
             loadingData: function (e) {
                 var self = this;
@@ -197,7 +209,6 @@
                 // TODO: favorite/unfavorite article for current user;
                 console.log(e.target.attr.fid);
                 apis.doFavorite({userId:1, articleId: e.target.attr.fid}, function(res){
-                    console.log(res);
                     if(res.status=='favorite'){
                         
                     }

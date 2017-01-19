@@ -63,6 +63,7 @@
 <script>
 require('weex-components');
 var stream = require('@weex-module/stream');
+var storage = require('@weex-module/storage');
 var apis = require('../common/api');
 
 module.exports = {
@@ -85,9 +86,16 @@ module.exports = {
                 password: self.txtPassword,
                 clientId: platform
             }
-            console.log(formData);
-            apis.getToken(formData, function(ret){
-                console.log(ret);
+            apis.getToken(formData, function(res){
+                console.log('get token: ', res);
+                storage.setItem('accessToken', res.token.accessToken, function(e) {
+                    console.log('set item accessToken: ', e);
+                    storage.getItem('accessToken', function(e) {
+                        console.log('get item accessToken: ', e);
+                    });
+                });
+            }, function(res){
+                console.log('get token error: ', res);
             });
         }
     }
